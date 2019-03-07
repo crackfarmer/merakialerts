@@ -60,5 +60,5 @@ typings/
 # next.js build output
 .next
 
-# tom FTP Config
+# Atom FTP Config
 .ftpconfig
