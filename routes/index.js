@@ -70,7 +70,11 @@ router.post('/', function(req, res, next) {
           console.log("Alert Sent to Slack.");
         }
         else{
-          console.log("Slack Error: "+error);
+          console.log("** Error sending to Slack **")
+          console.log("URL Used for Slack: "+options.url);
+          console.log("JSON sent to Slack: "+JSON.stringify(options.json));
+          console.log("HTTP Response from Slack: "+JSON.stringify(response));
+          console.log("Nodejs Error: "+error);
         }
       });
     }
@@ -94,10 +98,14 @@ router.post('/', function(req, res, next) {
       // Do HTTP POST
       request.post(options,function (error, response, body) {
         if (!error && response.statusCode == 200) {
-          console.log("Alert Sent to Teams.");
+          console.log("Alert Sent to MS Teams.");
         }
         else{
-          console.log("Teams Error: "+error);
+          console.log("** Error sending to MS Teams **")
+          console.log("URL Used for MS Teams: "+options.url);
+          console.log("JSON sent to MS Teams: "+JSON.stringify(options.json));
+          console.log("HTTP Response from MS Teams: "+JSON.stringify(response));
+          console.log("Nodejs Error: "+error);
         }
       });
     }
@@ -124,7 +132,11 @@ router.post('/', function(req, res, next) {
           console.log("Alert Sent to Telegram.");
         }
         else{
-          console.log("Telegram Error: "+error);
+          console.log("** Error sending to Telegram **")
+          console.log("URL Used for Telegram: "+options.url);
+          console.log("JSON sent to Telegram: "+JSON.stringify(options.json));
+          console.log("HTTP Response from Telegram: "+JSON.stringify(response));
+          console.log("Nodejs Error: "+error);
         }
       });
     }
