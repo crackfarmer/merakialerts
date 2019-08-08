@@ -11,6 +11,7 @@ const Slack_URL = process.env.Slack_URL;
 const Teams_URL = process.env.Teams_URL;
 const Telegram_API_Key = process.env.Telegram_API_Key;
 const Telegram_Channel_ID = process.env.Telegram_Channel_ID;
+const Discord_URL = process.env.Discord_URL;
 
 // Check if Env Vars were set
 if(!Meraki_Secret){
@@ -19,8 +20,8 @@ if(!Meraki_Secret){
 }
 
 // Check if Env Vars were set
-if(!Slack_URL && !Teams_URL && !Telegram_API_Key){
-  console.log("Slack_URL, Teams_URL, and Telegram_API_Key not set, exiting.")
+if(!Slack_URL && !Teams_URL && !Telegram_API_Key && !Discord_URL){
+  console.log("Slack_URL, Teams_URL, Telegram_API_Key, and Discord_URL not set, exiting.")
   process.exit();
 }
 
@@ -39,7 +40,7 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res, next) {
   //validate the POST came from Meraki. Also check if alert was generated using the "Send Test webhook" button
-  if(req.body.sharedSecret == Meraki_Secret || (req.body.alertType == "Settings changed" && req.body.alertId == 0)){
+  if(req.body.sharedSecret == Meraki_Secret || (req.body.alertType == "Settings changed" && req.body.alertId == 0)) {
     console.log(req.body);
 
     // Assign vars from JSON post
@@ -49,7 +50,7 @@ router.post('/', function(req, res, next) {
     var alertType = req.body.alertType;
     var deviceUrl = req.body.deviceUrl;
 
-    if(Slack_URL){
+    if(Slack_URL) {
       // Build alert to send to Slack
       var alert = "Network: "+networkName+"\nAlert: "+alertType;
 
@@ -79,7 +80,7 @@ router.post('/', function(req, res, next) {
       });
     }
 
-    if(Teams_URL){
+    if(Teams_URL) {
       // Build alert to send to Teams
       // Alerts Markdown
       var alert = "Network: "+networkName+"  \nAlert: "+alertType+"  ";
@@ -110,7 +111,7 @@ router.post('/', function(req, res, next) {
       });
     }
 
-    if(Telegram_API_Key){
+    if(Telegram_API_Key) {
       // Build alert to send to Telegram
       // Alerts Markdown
       var alert = "Network: "+networkName+"  \nAlert: "+alertType+"  ";
@@ -141,6 +142,36 @@ router.post('/', function(req, res, next) {
       });
     }
 
+    if(Discord_URL) {
+      // Build alert to send to Discord
+      // Alerts Markdown
+      var alert = "Network: "+networkName+"  \nAlert: "+alertType+"  ";
+
+      // If alert was about a device, add that info.
+      if(deviceName){
+        alert = alert+"\nDevice: ["+deviceName+"]("+deviceUrl+")";
+      }
+
+      // Set HTTP POST options
+      var options = {
+        url: Discord_URL,
+        json: { "content": alert}
+      };
+
+      // Do HTTP POST
+      request.post(options,function (error, response, body) {
+        if (!error && response.statusCode == 204) { // Discord returns a 204
+          console.log("Alert Sent to Discord.");
+        }
+        else{
+          console.log("** Error sending to Discord **")
+          console.log("URL Used for Discord: "+options.url);
+          console.log("JSON sent to Discord: "+JSON.stringify(options.json));
+          console.log("HTTP Response from Discord: "+JSON.stringify(response));
+          console.log("Nodejs Error: "+error);
+        }
+      });
+    }
     // Respond with HTTP 204 back to Meraki
     res.status(204).end();
   }
